@@ -428,6 +428,41 @@ function! s:tag_weblink(value) abort
   return line
 endfunction
 
+function! s:resonyze_imglink(url_0)
+  let url_0 = a:url_0
+  " file:img/something.png -> img/something.png
+  let url = split(url_0, ':')[1]
+
+  " get the full path to subdir of the current wikifile 
+  let wikifilepath = fnamemodify(s:current_wiki_file, ":p:h")
+  " full path to the external resource file
+  let url = wikifilepath . "/" . url
+
+  " this code just creates a directory in the html folder
+  let dir = fnamemodify(url, ':p:h')
+
+  let html_path = vimwiki#vars#get_wikilocal('path_html')
+  let wiki_path = vimwiki#vars#get_wikilocal('path')
+
+  "echom "COMPARE THESE TWO"
+  "echom html_path . split(dir, wiki_path)[0]
+  "echom "/home/vector/website/html" . split(dir, '/home/vector')[0]
+  "let dir = "/home/vector/website/html" . split(dir, '/home/vector')[0]
+  let dir = html_path . split(dir, wiki_path)[0]
+  call system("if [[ -d " . dir . " ]]; then :; else mkdir " . dir . "; fi")
+  echom "Copying " . url . " to " . dir
+  call system("cp " . url . " " . dir)
+
+  " path of the newly copied file (in html folder)
+  let copied_path = dir . '/' . fnamemodify(url, ':p:t')
+  " resonyze.xyz root folder
+  let website_root = "/home/vector/notes/html"
+
+  " this is to set the path for my nginx server
+  let url = split(copied_path, website_root)[0]
+  let url = "." . url
+  return url
+endfunction
 
 function! s:tag_wikiincl(value) abort
   " {{imgurl|arg1|arg2}}    -> ???
@@ -455,6 +490,9 @@ function! s:tag_wikiincl(value) abort
     else
       let url = link_infos.filename
     endif
+
+    " remove this line and above function to remove my mod.
+    let url = s:resonyze_imglink(url_0)
 
     let url = escape(url, '#')
     let line = s:linkify_image(url, descr, verbatim_str)
