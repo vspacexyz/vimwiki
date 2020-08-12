@@ -454,13 +454,13 @@ function! s:resonyze_imglink(url_0)
   call system("cp " . url . " " . dir)
 
   " path of the newly copied file (in html folder)
-  let copied_path = dir . '/' . fnamemodify(url, ':p:t')
+  " let copied_path = dir . '/' . fnamemodify(url, ':p:t')
   " resonyze.xyz root folder
-  let website_root = "/home/vector/notes/html"
+  " let website_root = "/home/vector/notes/html"
 
   " this is to set the path for my nginx server
-  let url = split(copied_path, website_root)[0]
-  let url = "." . url
+  " let url = split(copied_path, website_root)[0]
+  let url = "./img/" . fnamemodify(url, ':p:t')
   return url
 endfunction
 
